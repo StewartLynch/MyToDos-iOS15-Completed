@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var dataStore: DataStore
-    @FocusState private var focusedField: Bool?
+    @FocusState private var focusedField: Bool
     var body: some View {
         NavigationView {
             List() {
@@ -25,9 +25,21 @@ struct ContentView: View {
                         Image(systemName: "plus.circle.fill")
                     }
             )
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button {
+                            focusedField = false
+                        } label: {
+                            Image(systemName: "keyboard.chevron.compact.down")
+                        }
+                    }
+                }
+            }
         }.task {
             if FileManager().docExist(named: fileName){
-                await dataStore.loadToDosAsync()
+                dataStore.loadToDos2()
             }
         }
         .alert("File Error",
@@ -36,19 +48,6 @@ struct ContentView: View {
             appError.button
         } message: { appError in
             Text(appError.message)
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                HStack {
-                    Spacer()
-                    Button {
-                        focusedField = nil
-                    } label: {
-                        Image(systemName: "keyboard.chevron.compact.down")
-                    }
-                }
-                
-            }
         }
         .searchable(text: $dataStore.filterText, prompt: Text("Filter ToDos"))
     }

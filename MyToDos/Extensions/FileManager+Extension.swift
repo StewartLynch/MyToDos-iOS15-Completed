@@ -22,7 +22,7 @@ extension FileManager {
             completion(.saveError)
         }
     }
-    func saveDocument(contents: String, docName: String) async throws {
+    func saveDocument(contents: String, docName: String) throws {
         let url = Self.docDirURL.appendingPathComponent(docName)
         do {
             try contents.write(to: url, atomically: true, encoding: .utf8)
@@ -41,7 +41,7 @@ extension FileManager {
         }
     }
     
-    func readDocument(docName: String) async throws -> Data {
+    func readDocument(docName: String) throws -> Data {
         let url = Self.docDirURL.appendingPathComponent(docName)
         do {
             let data = try Data(contentsOf: url)
@@ -51,19 +51,6 @@ extension FileManager {
         }
     }
     
-    // alternative
-    func readDocument2(docName: String) async throws -> Data {
-        return try await withCheckedThrowingContinuation({ continuation in
-            readDocument(docName: docName) { result in
-                switch result {
-                case .success(let data):
-                    continuation.resume(returning: data)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
-        })
-    }
     
     func docExist(named docName: String) -> Bool {
         fileExists(atPath: Self.docDirURL.appendingPathComponent(docName).path)

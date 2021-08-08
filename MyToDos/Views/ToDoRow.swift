@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ToDoRow: View {
     @EnvironmentObject var dataStore: DataStore
-    var focusedField: FocusState<Bool?>.Binding
+    var focusedField: FocusState<Bool>.Binding
     var body: some View {
         ForEach($dataStore.filteredToDos) { $toDo in
             TextField(toDo.name, text: $toDo.name)

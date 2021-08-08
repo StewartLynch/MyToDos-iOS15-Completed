@@ -17,6 +17,7 @@ class DataStore: ObservableObject {
             filterToDos()
         }
     }
+    
     @Published var filteredToDos: [ToDo] = []
     init() {
         print(FileManager.docDirURL.path)
@@ -29,41 +30,34 @@ class DataStore: ObservableObject {
             filteredToDos = toDos
         }
     }
+    
+
     func newToDo() {
         addToDo(ToDo(name: ""))
     }
     
     func addToDo(_ toDo: ToDo) {
         toDos.append(toDo)
-        Task {
-            await saveToDosAsync()
-            filteredToDos = toDos
-        }
-        
+        saveToDosThrows()
+        filteredToDos = toDos
     }
     
     func updateToDo(_ toDo: ToDo) {
         guard let index = toDos.firstIndex(where: { $0.id == toDo.id}) else { return }
         toDos[index] = toDo
-        Task {
-            await saveToDosAsync()
-        }
+        saveToDosThrows()
     }
     
     func deleteToDo(at indexSet: IndexSet) {
         toDos.remove(atOffsets: indexSet)
-        Task {
-            await saveToDosAsync()
-        }
+        saveToDosThrows()
     }
     
     func deleteTodo(_ toDo: ToDo) {
         if let toDoToDeleteIndex = toDos.firstIndex(where: {$0.id == toDo.id}) {
             toDos.remove(at: toDoToDeleteIndex)
-            Task {
-                await saveToDosAsync()
-                filterToDos()
-            }
+            saveToDosThrows()
+            filterToDos()
         }
     }
     
@@ -87,9 +81,9 @@ class DataStore: ObservableObject {
         }
     }
     
-    func loadToDosAsync() async {
+    func loadToDos2() {
         do {
-            let data = try await FileManager().readDocument2(docName: fileName)
+            let data = try FileManager().readDocument(docName: fileName)
             let decoder = JSONDecoder()
             do {
                 toDos = try decoder.decode([ToDo].self, from: data)
@@ -124,13 +118,13 @@ class DataStore: ObservableObject {
         }
     }
     
-    func saveToDosAsync() async {
+    func saveToDosThrows() {
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(toDos)
             let jsonString = String(decoding: data, as: UTF8.self)
             do {
-            try await FileManager().saveDocument(contents: jsonString, docName: fileName)
+            try FileManager().saveDocument(contents: jsonString, docName: fileName)
             } catch {
                 appError = ErrorType(error: error as! ToDoError)
                 showErrorAlert = true
